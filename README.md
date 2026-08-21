@@ -19,7 +19,7 @@ We are collecting a custom dataset of handwritten characters consisting of **36 
 ### Step 1: Clone the Repository
 Open your terminal / command prompt and clone the repository:
 ```bash
-git clone <YOUR_GITHUB_REPO_URL>
+git clone https://github.com/Conca979/CNN-from-scratch-with-Numpy.git
 cd CNN
 ```
 

@@ -21,14 +21,13 @@ class CharacterGeneratorApp:
         
         # Initialize variables
         self.classes = [str(i) for i in range(10)] + [chr(i) for i in range(ord('A'), ord('Z')+1)]
-        self.writers = ["anhduongakali-hue", "HuyHaDang", "huyta1308", "luongnm23ba14184-lgtm", "minhduc1212", "Conca979"]
+        self.writers = ["anhduongakali-hue", "HuyHaDang", "huyta1308", "minhduc1212", "Conca979"]
         self.writer_to_short = {
-            "anhduongakali-hue": "ahduong",
+            "anhduongakali-hue": "Akali",
             "HuyHaDang": "DHuy",
             "huyta1308": "THuy",
-            "luongnm23ba14184-lgtm": "luong",
-            "minhduc1212": "md",
-            "Conca979": "ca"
+            "minhduc1212": "MDuc",
+            "Conca979": "Fish"
         }
         
         self.current_class = tk.StringVar(value=self.classes[0])

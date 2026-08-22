@@ -7,7 +7,12 @@ authors = [
     { name = "Duong", email = "tn7956666@gail.com" }
 ]
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "keras>=3.12.4",
+    "numpy>=2.2.6",
+    "pillow>=12.3.0",
+    "tensorflow>=2.21.0",
+]
 
 [project.scripts]
 cnn = "cnn:main"

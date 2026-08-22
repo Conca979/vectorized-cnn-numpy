@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageTk
 import os
 import csv
 import glob
@@ -21,7 +21,15 @@ class CharacterGeneratorApp:
         
         # Initialize variables
         self.classes = [str(i) for i in range(10)] + [chr(i) for i in range(ord('A'), ord('Z')+1)]
-        self.writers = [f"W{i:02d}" for i in range(1, 7)]
+        self.writers = ["anhduongakali-hue", "HuyHaDang", "huyta1308", "luongnm23ba14184-lgtm", "minhduc1212", "Conca979"]
+        self.writer_to_short = {
+            "anhduongakali-hue": "anh",
+            "HuyHaDang": "DHuy",
+            "huyta1308": "THuy",
+            "luongnm23ba14184-lgtm": "luo",
+            "minhduc1212": "min",
+            "Conca979": "Con"
+        }
         
         self.current_class = tk.StringVar(value=self.classes[0])
         self.current_writer = tk.StringVar(value=self.writers[0])
@@ -37,7 +45,8 @@ class CharacterGeneratorApp:
 
     def get_metadata_file(self):
         # Using a writer-specific CSV to avoid Git merge conflicts for your group!
-        return os.path.join(self.dataset_dir, f"metadata_{self.current_writer.get()}.csv")
+        writer_short = self.writer_to_short[self.current_writer.get()]
+        return os.path.join(self.dataset_dir, f"metadata_{writer_short}.csv")
 
     def setup_ui(self):
         # Top Frame for controls
@@ -46,7 +55,7 @@ class CharacterGeneratorApp:
         
         # Writer Dropdown
         ttk.Label(control_frame, text="Writer ID:").pack(side=tk.LEFT, padx=5)
-        writer_cb = ttk.Combobox(control_frame, textvariable=self.current_writer, values=self.writers, state="readonly", width=5)
+        writer_cb = ttk.Combobox(control_frame, textvariable=self.current_writer, values=self.writers, state="readonly", width=25)
         writer_cb.pack(side=tk.LEFT, padx=5)
         writer_cb.bind("<<ComboboxSelected>>", lambda e: self.update_sample_id())
         
@@ -65,7 +74,15 @@ class CharacterGeneratorApp:
         canvas_frame.pack()
         
         self.canvas = tk.Canvas(canvas_frame, width=self.canvas_size, height=self.canvas_size, bg="white", highlightbackground="black", highlightthickness=1)
-        self.canvas.pack()
+        self.canvas.pack(side=tk.LEFT, padx=10)
+
+        # Preview Frame
+        preview_frame = ttk.Frame(canvas_frame)
+        preview_frame.pack(side=tk.LEFT, padx=10, fill=tk.Y)
+        ttk.Label(preview_frame, text="48x48 Preview:").pack()
+        
+        self.preview_label = tk.Label(preview_frame, width=self.canvas_size, height=self.canvas_size, bg="white", highlightbackground="black", highlightthickness=1)
+        self.preview_label.pack(pady=5)
         
         # Bindings for drawing
         self.canvas.bind("<Button-1>", self.start_draw)
@@ -89,8 +106,26 @@ class CharacterGeneratorApp:
         self.image = Image.new("L", (self.canvas_size, self.canvas_size), 255)
         self.draw_img = ImageDraw.Draw(self.image)
         self.canvas.delete("all")
+        
+        # Draw central crosshair and bounding box on UI canvas (not on PIL image)
+        mid = self.canvas_size / 2
+        margin = self.canvas_size / 4
+        self.canvas.create_line(mid, 0, mid, self.canvas_size, fill="#e0e0e0", width=2, dash=(4, 4))
+        self.canvas.create_line(0, mid, self.canvas_size, mid, fill="#e0e0e0", width=2, dash=(4, 4))
+        self.canvas.create_rectangle(margin, margin, self.canvas_size - margin, self.canvas_size - margin, outline="#e0e0e0", width=2, dash=(4, 4))
+        
         self.last_x = None
         self.last_y = None
+        self.update_preview()
+
+    def update_preview(self):
+        # Downscale to target size to get the actual model input
+        preview_image = self.image.resize((self.target_size, self.target_size), Image.Resampling.LANCZOS)
+        # Scale back up using Nearest Neighbor to make pixels visible on the UI
+        preview_image = preview_image.resize((self.canvas_size, self.canvas_size), Image.Resampling.NEAREST)
+        
+        self.preview_photo = ImageTk.PhotoImage(preview_image)
+        self.preview_label.config(image=self.preview_photo)
 
     def start_draw(self, event):
         self.is_drawing = True
@@ -99,6 +134,7 @@ class CharacterGeneratorApp:
         r = self.pen_width / 2
         self.canvas.create_oval(event.x - r, event.y - r, event.x + r, event.y + r, fill="black", outline="black")
         self.draw_img.ellipse([event.x - r, event.y - r, event.x + r, event.y + r], fill=0)
+        self.update_preview()
 
     def stop_draw(self, event):
         self.is_drawing = False
@@ -120,6 +156,7 @@ class CharacterGeneratorApp:
         self.draw_img.line([(self.last_x, self.last_y), (x, y)], fill=0, width=self.pen_width, joint="curve")
         
         self.last_x, self.last_y = x, y
+        self.update_preview()
 
     def clear_canvas(self):
         self.init_canvas()
@@ -128,6 +165,7 @@ class CharacterGeneratorApp:
     def update_sample_id(self):
         cls = self.current_class.get()
         writer = self.current_writer.get()
+        writer_short = self.writer_to_short[writer]
         
         class_dir = os.path.join(self.dataset_dir, cls)
         
@@ -135,7 +173,7 @@ class CharacterGeneratorApp:
             self.sample_id.set("001")
             return
             
-        pattern = os.path.join(class_dir, f"{cls}_{writer}_*.png")
+        pattern = os.path.join(class_dir, f"{cls}_{writer_short}_*.png")
         files = glob.glob(pattern)
         
         max_id = 0
@@ -156,12 +194,13 @@ class CharacterGeneratorApp:
     def save_image(self):
         cls = self.current_class.get()
         writer = self.current_writer.get()
+        writer_short = self.writer_to_short[writer]
         sample = self.sample_id.get()
         
         class_dir = os.path.join(self.dataset_dir, cls)
         os.makedirs(class_dir, exist_ok=True)
         
-        filename = f"{cls}_{writer}_{sample}.png"
+        filename = f"{cls}_{writer_short}_{sample}.png"
         filepath = os.path.join(class_dir, filename)
         
         # IMPORTANT: Downscale the high-res 480x480 drawing to 48x48 
@@ -177,7 +216,7 @@ class CharacterGeneratorApp:
             writer_csv = csv.writer(csvfile)
             if not file_exists:
                 writer_csv.writerow(['filename', 'label', 'writer_id', 'sample_id'])
-            writer_csv.writerow([filename, cls, writer, sample])
+            writer_csv.writerow([filename, cls, writer_short, sample])
             
         self.status_var.set(f"Saved {filename} (Anti-Aliased)")
         self.clear_canvas()

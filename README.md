@@ -6,11 +6,11 @@ Welcome team! This guide explains how to set up, use, and sync your dataset cont
 
 ## 🎯 Overview & Goal
 
-We are collecting a custom dataset of handwritten characters consisting of **36 classes** (Digits `0-9` and Uppercase Letters `A-Z`) across **6 writers** (`W01` to `W06`).
+We are collecting a custom dataset of handwritten characters consisting of **36 classes** (Digits `0-9` and Uppercase Letters `A-Z`) across **6 writers** (github names).
 
 - **Image Specs:** 48×48 Grayscale PNG with anti-aliased strokes.
-- **Naming Format:** `[CLASS]_[WRITER]_[SAMPLE].png` (e.g., `A_W01_001.png`).
-- **Target Count:** 100 samples per class per writer (36 classes × 100 = 3,600 images per person; Total dataset = 21,600 images).
+- **Naming Format:** `[CLASS]_[WRITER]_[SAMPLE].png` (e.g., `A_fish_001.png`).
+- **Target Count:** 20 samples per class per writer (36 classes × 20 = 720 images per person; Total dataset = 3.600 images).
 
 ---
 
@@ -38,8 +38,8 @@ pip install Pillow
    python image_generation.py
    ```
 2. **Select your Writer ID:**
-   - In the top bar, set **Writer ID** to your assigned ID (`W01`, `W02`, `W03`, `W04`, `W05`, or `W06`). 
-   - ⚠️ *Important:* Make sure you keep your assigned Writer ID selected throughout your session.
+   - In the top bar, set **Writer ID** to your github name
+   - ⚠️ *Important:* Make sure you keep your assigned Writer name selected throughout your session.
 3. **Select Target Class:**
    - Pick the character you are drawing (e.g., `0`, `1`, `A`, `B`).
 4. **Draw on Canvas:**
@@ -55,7 +55,7 @@ pip install Pillow
 
 ## 🔄 3. Syncing Your Work to GitHub
 
-Because filenames include your Writer ID (`..._W01_...png`) and metadata is saved to `metadata_<WRITER_ID>.csv`, **there will be no Git merge conflicts between team members**.
+Because filenames include your Writer name (`..._conca979_...png`) and metadata is saved to `metadata_<WRITER_NAME>.csv`, **there will be no Git merge conflicts between team members**.
 
 Push your work to GitHub periodically (e.g., after every session or every 100 images):
 

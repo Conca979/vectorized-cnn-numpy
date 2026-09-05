@@ -1,5 +1,5 @@
 import numpy as np
-from core import Module
+from .core import Module
 
 
 class MaxPool2D(Module):

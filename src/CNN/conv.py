@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Callable
-from core import Module
+from .core import Module
 
 
 def _im2col_indices(C_in: int, kH: int, kW: int, out_H: int, out_W: int, stride: int):

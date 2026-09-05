@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Callable
-from core import Module
+from .core import Module
 
 
 class Dense(Module):

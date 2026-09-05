@@ -3,14 +3,14 @@ import pickle
 import time
 import os
 
-from src.CNN.network import Network
-from src.CNN.conv import Conv2D
-from src.CNN.pooling import MaxPool2D
-from src.CNN.pooling import Flatten
-from src.CNN.linear import Dense, InputLayer
-from src.CNN.functional import ActivationFunction, LossFunction
+from CNN.network import Network
+from CNN.conv import Conv2D
+from CNN.pooling import MaxPool2D
+from CNN.pooling import Flatten
+from CNN.linear import Dense, InputLayer
+from CNN.functional import ActivationFunction, LossFunction
 
-# -------------
+# -------------``
 # 1. Load data
 # -------------
 
@@ -48,7 +48,7 @@ def onehot(labels, n=10):
   return m
 
 print("Loading CIFAR-10 ...")
-data_dir = os.path.join(os.path.dirname(__file__), "dataset", "cifar-10-batches-py")
+data_dir = os.path.join(os.path.dirname(__file__), "..", "dataset", "cifar-10-batches-py")
 x_train_raw, y_train_lbl, x_test_raw, y_test_lbl = load_cifar10_data(data_dir)
 
 # Shape: (N, 3, 32, 32), normalised to [0, 1]
@@ -76,11 +76,11 @@ layers = [
   MaxPool2D(2, 2),
   
   Flatten(),
-  Dense(512, act_func=act.ReLU, use_dropout=True, drop_rate=0),
+  Dense(512, act_func=act.ReLU, use_dropout=True, drop_rate=0.3),
   Dense(10,  act_func=act.softmax, use_dropout=False, drop_rate=0.0)
 ]
 
-epoch_limit = 1
+epoch_limit = 10
 gamma = 0.01**(1/epoch_limit)
 
 print(f'--- Learning rate deay = {gamma:.5f} for epoch limit of {epoch_limit} --')
@@ -96,8 +96,8 @@ model = Network(
   epsilon=1e-4,
   epoch_limit=epoch_limit, # Needs more epochs than MNIST
   iteration_event_trigger=1,
-  # eval_every=1,
-  exponential_moving_average= 0.2
+  eval_every=1,
+  # exponential_moving_average= 0.2
 )
 
 # -------------

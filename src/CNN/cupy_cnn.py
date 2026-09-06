@@ -465,7 +465,7 @@ class Network:
                 self.network_layers[i].next_layer = self.network_layers[i + 1]
             self.network_layers[i].network = self
             self.network_layers[i].init()
-        print("--- Neural network is initialized successfully ---")
+        print("|| Neural network is initialized successfully")
 
     def compute_loss(self, targets: cp.ndarray, derived: bool = False) -> cp.ndarray:
         predicted_vals = self.network_layers[-1].layer_output
@@ -490,7 +490,7 @@ class Network:
     def fit_model(self) -> None:
         if self.eval_every == 0 and not self.test_set_exist:
             pass
-        print("--- Start training ---")
+        print("|| Start training")
         self.training = True
         n_samples = self.x_train.shape[0]
         smoothed_loss = None

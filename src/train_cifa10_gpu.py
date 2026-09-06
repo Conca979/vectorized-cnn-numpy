@@ -3,7 +3,12 @@ import pickle
 import time
 import os
 
-from src.CNN.cupy_cnn import Network, Conv2D, MaxPool2D, Flatten, Dense, InputLayer, ActivationFunction, LossFunction
+from CNN.cupy_cnn import Network
+from CNN.cupy_cnn import Conv2D
+from CNN.cupy_cnn import MaxPool2D
+from CNN.cupy_cnn import Flatten
+from CNN.cupy_cnn import Dense, InputLayer
+from CNN.cupy_cnn import ActivationFunction, LossFunction
 
 # -------------
 # 1. Load data
@@ -17,9 +22,9 @@ CIFAR10_CLASSES = [
 ]
 
 def unpickle(file):
-    with open(file, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
-    return dict
+  with open(file, 'rb') as fo:
+    dict = pickle.load(fo, encoding='bytes')
+  return dict
 
 def load_cifar10_data(data_dir):
     x_train_list, y_train_list = [], []
@@ -42,8 +47,8 @@ def onehot(labels, n=10):
   m[np.arange(len(labels)), labels] = 1
   return m
 
-print("Loading CIFAR-10 ...")
-data_dir = os.path.join(os.path.dirname(__file__), "dataset", "cifar-10-batches-py")
+print("|| Loading CIFAR-10 ...")
+data_dir = os.path.join(os.path.dirname(__file__), "..", "dataset", "cifar-10-batches-py")
 x_train_raw, y_train_lbl, x_test_raw, y_test_lbl = load_cifar10_data(data_dir)
 
 # Shape: (N, 3, 32, 32), normalised to [0, 1]
@@ -51,7 +56,18 @@ x_train = (x_train_raw.reshape(-1, 3, 32, 32) / 255.0).astype(np.float32)
 x_test  = (x_test_raw.reshape(-1, 3, 32, 32)  / 255.0).astype(np.float32)
 y_train = onehot(y_train_lbl)
 y_test  = onehot(y_test_lbl)
-print(f"  x_train: {x_train.shape}  x_test: {x_test.shape}")
+
+#  Per-channel mean/std normalisation
+dataset = np.concatenate((x_train, x_test))
+mean = np.mean(dataset, axis=(0,2,3)).reshape(1, 3, 1, 1)
+std = np.std(dataset, axis=(0,2,3)).reshape(1, 3, 1, 1)
+x_train = (x_train - mean) / std
+x_test = (x_test - mean) / std
+
+print(f"\tx_train: {x_train.shape}\n"  # (50000, 3, 32, 32)
+      f"\tx_test:  {x_test.shape}\n"   # (10000, 3, 32, 32)
+      f"\ty_train: {y_train.shape}\n"  # (50000, 10)
+      f"\ty_test:  {y_test.shape}\n")  # (10000, 10)
 
 # -------------
 # 2. Build model
@@ -71,14 +87,14 @@ layers = [
   MaxPool2D(2, 2),
   
   Flatten(),
-  Dense(512, act_func=act.ReLU, use_dropout=True, drop_rate=0),
+  Dense(512, act_func=act.ReLU, use_dropout=True, drop_rate=0.0),
   Dense(10,  act_func=act.softmax, use_dropout=False, drop_rate=0.0)
 ]
 
 epoch_limit = 10
 gamma = 0.01**(1/epoch_limit)
 
-print(f'--- Learning rate decay = {gamma:.5f} for epoch limit of {epoch_limit} --')
+print(f'|| Learning rate decay = {gamma:.5f} for epoch limit of {epoch_limit} --')
 
 model = Network(
   layers=layers,
@@ -88,22 +104,22 @@ model = Network(
   batch=256,
   learning_rate=0.05,
   lr_decay=gamma,
-  epsilon=1e-4,
+  epsilon=1e-7,
   epoch_limit=epoch_limit,
   iteration_event_trigger=100,
   eval_every=1,
-  exponential_moving_average= 0.2
+  exponential_moving_average= 0
 )
 
 # -------------
 # 3. Train
 # -------------
 
-print("\nTraining CIFAR-10 on GPU (this should be significantly faster!) ...\n")
+print("\n|| Training CIFAR-10 on GPU (this should be significantly faster!) ...\n")
 t0 = time.time()
 model.fit_model()
 elapsed = time.time() - t0
-print(f"\nTraining done in {elapsed:.2f} seconds ({elapsed / 60:.1f} min)")
+print(f"\n|| Training done in {elapsed:.2f} seconds ({elapsed / 60:.1f} min)")
 
 # -------------
 # 4. Evaluate & save
@@ -114,7 +130,7 @@ print(f"Test accuracy: {accuracy:.2f}%")
 
 res = '...'
 while res != 'n':
-  res = input("Want to save the pre-trained weights? -> 'y' for yes 'n' for no - ")
+  res = input("|| Save the pre-trained weights? -> 'y' for yes 'n' for no - ")
   if res == 'y':
     model.save_weights(WEIGHTS_FILE, accuracy=accuracy)
     break

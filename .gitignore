@@ -11,3 +11,6 @@ venv
 
 # old version
 app.py
+
+CNN-cifar10-GPU.ipynb
+dataset/cifar-10-batches-py/

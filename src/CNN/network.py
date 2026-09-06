@@ -60,7 +60,7 @@ class Network:
       # Call init on each layer
       self.network_layers[i].init()
 
-    print("--- Neural network is initialized successfully ---")
+    print("|| Neural network is initialized successfully")
 
   def compute_loss(self,
                    targets: np.ndarray,
@@ -92,7 +92,7 @@ class Network:
   def fit_model(self) -> None:
     if self.eval_every == 0 and not self.test_set_exist:
       pass  # no test set; skip end-of-training eval silently
-    print("--- Start training ---")
+    print("|| Start training")
     self.training = True
     n_samples = self.x_train.shape[0]
     smoothed_loss = None

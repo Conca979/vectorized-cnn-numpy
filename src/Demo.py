@@ -197,16 +197,21 @@ class CifarApp:
     tk.Frame(self.root, bg=self.BG_DARK, height=14).pack()
 
   def _next_image(self):
-    # Pick a random image from the test set
-    idx = random.randint(0, len(self.x_test) - 1)
-    self.current_img_data = self.x_test[idx]
-    
-    true_class_idx = np.argmax(self.y_test[idx])
-    self.true_label.config(text=f"True Label: {self.classes[true_class_idx]}")
+    if self.x_test is None or self.y_test is None:
+      self.current_img_data = np.zeros((3, 32, 32), dtype=np.float32)
+      self.true_label.config(text="True Label: [Paste an Image]")
+      pil_img = Image.new('RGB', (32, 32), color=(42, 42, 64))
+    else:
+      # Pick a random image from the test set
+      idx = random.randint(0, len(self.x_test) - 1)
+      self.current_img_data = self.x_test[idx]
+      
+      true_class_idx = np.argmax(self.y_test[idx])
+      self.true_label.config(text=f"True Label: {self.classes[true_class_idx]}")
 
-    # Convert model format (3, 32, 32) float [0, 1] to PIL Image format (32, 32, 3) uint8 [0, 255]
-    img_array = (self.current_img_data.transpose(1, 2, 0) * 255.0).astype(np.uint8)
-    pil_img = Image.fromarray(img_array, mode='RGB')
+      # Convert model format (3, 32, 32) float [0, 1] to PIL Image format (32, 32, 3) uint8 [0, 255]
+      img_array = (self.current_img_data.transpose(1, 2, 0) * 255.0).astype(np.uint8)
+      pil_img = Image.fromarray(img_array, mode='RGB')
     
     # Scale up for display (use NEAREST to show the pixels clearly)
     preview_img = pil_img.resize((self.PREVIEW_PX, self.PREVIEW_PX), Image.NEAREST)
@@ -309,24 +314,24 @@ if __name__ == "__main__":
     print("  -> Run  training/cnn_train_cifar10.py  first to generate weights.")
     sys.exit(1)
 
-  # Load the test set to display random images
-  def unpickle(file):
-    with open(file, 'rb') as fo:
-      dict = pickle.load(fo, encoding='bytes')
-    return dict
+  # # Load the test set to display random images
+  # def unpickle(file):
+  #   with open(file, 'rb') as fo:
+  #     dict = pickle.load(fo, encoding='bytes')
+  #   return dict
       
-  data_dir = os.path.join(os.path.dirname(__file__), "..", "dataset", "cifar-10-batches-py")
-  test_batch = unpickle(os.path.join(data_dir, "test_batch"))
-  x_test_raw = test_batch[b'data']
-  y_test_lbl = np.array(test_batch[b'labels'])
+  # data_dir = os.path.join(os.path.dirname(__file__), "..", "dataset", "cifar-10-batches-py")
+  # test_batch = unpickle(os.path.join(data_dir, "test_batch"))
+  # x_test_raw = test_batch[b'data']
+  # y_test_lbl = np.array(test_batch[b'labels'])
   
-  x_test = (x_test_raw.reshape(-1, 3, 32, 32) / 255.0).astype(np.float32)
+  # x_test = (x_test_raw.reshape(-1, 3, 32, 32) / 255.0).astype(np.float32)
   
-  def onehot(labels, n=10):
-    m = np.zeros((len(labels), n), dtype=np.float32)
-    m[np.arange(len(labels)), labels] = 1
-    return m
-  y_test = onehot(y_test_lbl)
+  # def onehot(labels, n=10):
+  #   m = np.zeros((len(labels), n), dtype=np.float32)
+  #   m[np.arange(len(labels)), labels] = 1
+  #   return m
+  # y_test = onehot(y_test_lbl)
 
   act = ActivationFunction
   layers = [
@@ -347,5 +352,5 @@ if __name__ == "__main__":
   accuracy = model.load_weights(WEIGHTS_FILE) or 0.0
 
   root = tk.Tk()
-  CifarApp(root, model, x_test, y_test, accuracy)
+  CifarApp(root, model, None, None, accuracy)
   root.mainloop()

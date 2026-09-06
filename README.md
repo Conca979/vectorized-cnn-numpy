@@ -1,80 +1,83 @@
-# Handwritten Dataset Collector — Team Guide
+# Vectorized CNN in NumPy / CuPy
 
-Welcome team! This guide explains how to set up, use, and sync your dataset contributions for our CNN handwritten character dataset project.
+A custom Convolutional Neural Network built entirely from scratch using NumPy (and optionally CuPy for GPU acceleration). This project includes a CIFAR-10 image recognizer with an interactive GUI that you can train and run locally.
 
 ---
 
-## 🎯 Overview & Goal
-
-We are collecting a custom dataset of handwritten characters consisting of **36 classes** (Digits `0-9` and Uppercase Letters `A-Z`) across **6 writers** (github names).
-
-- **Image Specs:** 48×48 Grayscale PNG with anti-aliased strokes.
-- **Naming Format:** `[CLASS]_[WRITER]_[SAMPLE].png` (e.g., `A_fish_001.png`).
-- **Target Count:** 20 samples per class per writer (36 classes × 20 = 720 images per person; Total dataset = 3.600 images).
+## 🌟 Features
+- **Built from Scratch:** No PyTorch, TensorFlow, or Keras. Core ML operations (convolutions, pooling, linear layers, backpropagation) are manually implemented.
+- **CPU & GPU Support:** Train using standard NumPy or accelerate training drastically with CuPy.
+- **Interactive GUI:** An easy-to-use Tkinter application to test the model by pasting any image from your clipboard.
 
 ---
 
 ## 🛠️ 1. Setup & Installation
 
 ### Step 1: Clone the Repository
-Open your terminal / command prompt and clone the repository:
+Open your terminal or command prompt and clone the project:
 ```bash
-git clone https://github.com/Conca979/vectorized-cnn-numpy
+git clone https://github.com/Conca979/vectorized-cnn-numpy.git
 cd CNN
 ```
 
 ### Step 2: Install Dependencies
-Make sure you have Python 3 installed. Install the required image library:
+Make sure you have Python 3 installed. Then, install the required libraries:
 ```bash
-pip install Pillow
+pip install -r requirements.txt
 ```
+*(The `requirements.txt` includes `numpy` and `Pillow`).*
+
+### Optional: GPU Setup for Faster Training
+If you want to train the model on an NVIDIA GPU (highly recommended for speed), you must install `cupy`. Install the CuPy version that matches your CUDA toolkit (e.g., `cupy-cuda11x` or `cupy-cuda12x`):
+```bash
+pip install cupy-cuda12x
+```
+
+### Step 3: Download the Dataset (For Training Only)
+If you plan to train the model yourself, you will need the CIFAR-10 dataset:
+1. Download the [CIFAR-10 Python version](https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz).
+2. Extract the `.tar.gz` archive.
+3. Place the extracted `cifar-10-batches-py` folder directly inside the `dataset/` directory of this project.
+
+*(Your directory structure should look like this: `dataset/cifar-10-batches-py/data_batch_1`)*
 
 ---
 
-## 🎨 2. How to Collect Data
+## 🧠 2. Training the Model
 
-1. **Launch the app:**
+You can choose to train the model on the CPU or GPU. The GPU is significantly faster.
+
+### Option A: CPU Training
+Run the CPU training script. This uses standard NumPy.
+```bash
+python src/train_cifa10_cpu.py
+```
+
+### Option B: GPU Training
+If you have set up CuPy, run the GPU script:
+```bash
+python src/train_cifa10_gpu.py
+```
+
+### Saving Weights
+Once training finishes, the console will ask if you want to save the pre-trained weights:
+```
+Want to save the pre-trained weights? -> 'y' for yes 'n' for no - 
+```
+Press `y` to save. The weights will be generated and stored in the `weights/` directory (e.g., `weights/cnn_cifar10_weights_GPU.npz`).
+
+---
+
+## 🚀 3. Running the Demo (GUI)
+
+Once you have the trained weights (specifically `cnn_cifar10_weights_GPU.npz`), you can run the interactive GUI demo. 
+
+**Note:** The demo does *not* require the CIFAR-10 dataset to be downloaded. You can test the model using your own images!
+
+1. **Launch the Demo:**
    ```bash
-   python image_generation.py
+   python src/Demo.py
    ```
-2. **Select your Writer ID:**
-   - In the top bar, set **Writer ID** to your github name
-   - ⚠️ *Important:* Make sure you keep your assigned Writer name selected throughout your session.
-3. **Select Target Class:**
-   - Pick the character you are drawing (e.g., `0`, `1`, `A`, `B`).
-4. **Draw on Canvas:**
-   - Use your mouse or stylus to draw the character on the canvas.
-   - The app automatically applies anti-aliased smoothing to simulate real handwriting strokes.
-5. **Save & Next:**
-   - Click **Save & Next** (or press the button).
-   - The app automatically resamples the drawing to a 48x48 grayscale image, saves it in `dataset/<class>/`, appends metadata to `dataset/metadata_<WRITER_ID>.csv`, and automatically increments the sample counter for you.
-6. **Clear:**
-   - Click **Clear** if you make a mistake and want to redraw.
-
----
-
-## 🔄 3. Syncing Your Work to GitHub
-
-Because filenames include your Writer name (`..._conca979_...png`) and metadata is saved to `metadata_<WRITER_NAME>.csv`, **there will be no Git merge conflicts between team members**.
-
-Push your work to GitHub periodically (e.g., after every session or every 100 images):
-
-```bash
-# 1. Stage your dataset folder
-git add dataset/
-
-# 2. Commit your progress
-git commit -m "Add handwriting samples for W0X"
-
-# 3. Pull latest changes from team
-git pull --rebase origin main
-
-# 4. Push to GitHub
-git push origin main
-```
-
----
-
-## ❓ FAQ & Tips
-- **Where are images stored?** Inside the `dataset/` directory grouped by class folders (e.g., `dataset/A/A_W01_001.png`).
-- **Can I stop and continue later?** Yes! The app automatically scans your local files and picks up at the next sample ID when you re-select your Writer ID and Class.
+2. **How to Use the App:**
+   - **📋 Paste Image:** Copy any image from your computer or web browser (e.g., right-click an image and select "Copy image"). Then click this button in the app. The image will be automatically resized to fit the model (32x32).
+   - **⚡ Predict:** Click this to run the image through the neural network. The app will display the predicted class (e.g., "cat", "airplane", "dog") along with confidence percentages for all 10 classes.

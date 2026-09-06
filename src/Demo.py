@@ -6,12 +6,12 @@ import numpy as np
 from tkinter import font as tkfont
 from PIL import Image, ImageTk, ImageGrab, ImageOps
 
-from src.CNN.network import Network
-from src.CNN.conv import Conv2D
-from src.CNN.pooling import MaxPool2D
-from src.CNN.pooling import Flatten
-from src.CNN.linear import Dense, InputLayer
-from src.CNN.functional import ActivationFunction, LossFunction
+from CNN.network import Network
+from CNN.conv import Conv2D
+from CNN.pooling import MaxPool2D
+from CNN.pooling import Flatten
+from CNN.linear import Dense, InputLayer
+from CNN.functional import ActivationFunction, LossFunction
 
 # =====================================================================
 #  CIFAR-10 Random Image Predictor UI
@@ -302,7 +302,7 @@ class CifarApp:
 #  Main — requires pre-trained weights (run training/cnn_train_cifar10.py first)
 # =====================================================================
 if __name__ == "__main__":
-  WEIGHTS_FILE = os.path.join(os.path.dirname(__file__), "cnn_cifar10_weights.npz")
+  WEIGHTS_FILE = os.path.join(os.path.dirname(__file__), "..", "weights", "cnn_cifar10_weights_GPU.npz")
 
   if not os.path.exists(WEIGHTS_FILE):
     print(f"[ERROR] Weights not found: {WEIGHTS_FILE}")
@@ -311,11 +311,11 @@ if __name__ == "__main__":
 
   # Load the test set to display random images
   def unpickle(file):
-      with open(file, 'rb') as fo:
-          dict = pickle.load(fo, encoding='bytes')
-      return dict
+    with open(file, 'rb') as fo:
+      dict = pickle.load(fo, encoding='bytes')
+    return dict
       
-  data_dir = os.path.join(os.path.dirname(__file__), "cifar-10-batches-py")
+  data_dir = os.path.join(os.path.dirname(__file__), "..", "dataset", "cifar-10-batches-py")
   test_batch = unpickle(os.path.join(data_dir, "test_batch"))
   x_test_raw = test_batch[b'data']
   y_test_lbl = np.array(test_batch[b'labels'])

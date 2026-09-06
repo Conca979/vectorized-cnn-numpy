@@ -14,7 +14,7 @@ from CNN.functional import ActivationFunction, LossFunction
 # 1. Load data
 # -------------
 
-WEIGHTS_FILE = os.path.join(os.path.dirname(__file__), '..',  'weights', "cnn_cifar10_weights.npz")
+WEIGHTS_FILE = os.path.join(os.path.dirname(__file__), '..',  'weights', "cnn_cifar10_weights_CPU.npz")
 
 CIFAR10_CLASSES = [
   "airplane", "automobile", "bird", "cat", "deer",
